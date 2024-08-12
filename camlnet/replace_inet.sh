@@ -23,5 +23,5 @@ if [ "$REPLY" = "n" ] || [ "$REPLY" = "no" ] || [ "$REPLY" = "N" ]
   echo "Script done."
   exit 0
 fi 
-echo "Command intelligible."
+echo "Command unintelligible."
 exit 65
