@@ -25,28 +25,28 @@ u32_t n2;
 } */
 
 #undef tcp_GEmod4G
-int tcp_GEmod4G(n1, n2)
+/* int tcp_GEmod4G(n1, n2)
 u32_t n1;
 u32_t n2;
 {
 	return !((u32_t)(n1-n2) & 0x80000000L);
-}
+} */
 
 #undef tcp_Lmod4G
-int tcp_Lmod4G(n1, n2)
+/* int tcp_Lmod4G(n1, n2)
 u32_t n1;
 u32_t n2;
 {
 	return !!((u32_t)(n1-n2) & 0x80000000L);
-}
+} */
 
 #undef tcp_Gmod4G
-int tcp_Gmod4G(n1, n2)
+/* int tcp_Gmod4G(n1, n2)
 u32_t n1;
 u32_t n2;
 {
 	return !!((u32_t)(n2-n1) & 0x80000000L);
-}
+} */
 
 void tcp_extract_ipopt(tcp_conn, ip_hdr)
 tcp_conn_t *tcp_conn;

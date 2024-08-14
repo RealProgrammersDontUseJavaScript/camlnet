@@ -8,6 +8,7 @@ Copyright 1995 Philip Homburg
 
 #include <fcntl.h>
 #include <unistd.h>
+#include <caml/callback.h>
 #include <sys/svrctl.h>
 #include <minix/ds.h>
 #include <minix/endpoint.h>
@@ -64,6 +65,9 @@ int main(int argc, char *argv[])
 	message mess;
 	int ipc_status;
 	int r;
+
+	/* Start the Ocaml runtime */
+	caml_startup(argv);
 
 	/* SEF local startup. */
 	sef_local_startup();
