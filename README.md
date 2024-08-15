@@ -1,13 +1,9 @@
 # An implementation of the Minix TCP stack in OCaml
 
-## For [CSC 6523 - Topics in Networking](https://sandbox.mc.edu/~bennet/cs6523b/syl.html)
-
-### Term Project
-
 A reimplementation of Minix 3.3.0's TCP stack in OCaml, using the OCaml FFI. Linked into the inet ELF.
 
-*Currently in progress. Replaced a single function in tcp_lib.
-More of a proof of concept that Ocaml can be linked w/ Minix drivers.*
+*Currently in progress. Replaced tcp_lib helper functions.
+Currently more of a proof of concept that Ocaml can be linked w/ Minix drivers.*
 
 Build environment: Minix 3.3.0\
 Download: <https://wiki.minix3.org/doku.php?id=www:download:releasenotes-3.3.0>\
@@ -35,13 +31,11 @@ I haven't tested it out yet; you're certainly welcome to try.*
 11. Install the GNU utils, by running *pkgin install binutils*, then answering 'y'
 12. Run the command *pkg_add -f ocaml*
 13. Install the links browser by running *pkgin install links*
-14. Run the command *links www.github.com/RealProgrammersDontUseJavaScript/camlnet/raw/master/camlnet.tar.gz*
-15. Hit enter twice to download *camlnet.tar.gz*
+14. Run the command *links https://github.com/RealProgrammersDontUseJavaScript/camlnet/archive/refs/heads/master.zip*
+15. Hit enter twice to download *camlnet-master.zip*
 16. Hit q, followed by Enter, to exit the links browser
-17. Run *tar -xzf camlnet.tar.gz camlnet*
-18. *cd* into camlnet, then run *./build_script.sh*
-19. If it runs successfully, (which can be checked by typing *echo $?*),
-run the command *./replace_inet.sh*
+17. Run *unzip camlnet-master.zip*
+18. *cd* into *camlnet-master/camlnet*, then run *./build_script.sh*
 
 If you've done it all correctly, then congratulations, you now have proof
 that Ocaml can be used to write device drivers.

@@ -16,7 +16,7 @@ make || exit 1
 
 # After this, ask the user if they want
 # to replace the version of inet & reboot
-echo "Do you want to reboot right now?\n[y] [n]"
+echo "Do you want to replace inet right now?\n[y] [n]"
 read REPLY
 if [ "$REPLY" = "y" ] || [ "$REPLY" = "yes" ] || [ "$REPLY" = "Y" ] || [ "$REPLY" = "Yes" ] || [ "$REPLY" = "YES" ]; then
 	./replace_inet.sh
