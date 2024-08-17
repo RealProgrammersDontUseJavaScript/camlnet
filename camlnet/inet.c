@@ -35,6 +35,9 @@ Copyright 1995 Philip Homburg
 #include "generic/tcp.h"
 #include "generic/udp.h"
 
+
+#include <caml/custom.h> // Needed for struct custom_operations and register_custom_operations
+
 THIS_FILE
 
 #define RANDOM_DEV_NAME	"/dev/random"
@@ -60,14 +63,19 @@ static void ds_event(void);
 static void sef_local_startup(void);
 static int sef_cb_init_fresh(int type, sef_init_info_t *info);
 
+
+extern struct custom_operations tcp_conn_t_ops;
+
 int main(int argc, char *argv[])
 {
 	message mess;
 	int ipc_status;
 	int r;
 
-	/* Start the Ocaml runtime */
+	/* Start the Ocaml runtime 
+	and register for ser. and deser. */
 	caml_startup(argv);
+	register_custom_operations(&tcp_conn_t_ops);
 
 	/* SEF local startup. */
 	sef_local_startup();

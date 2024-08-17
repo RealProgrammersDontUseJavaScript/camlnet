@@ -17,41 +17,22 @@ Copyright 1995 Philip Homburg
 THIS_FILE
 
 #undef tcp_LEmod4G
-/* int tcp_LEmod4G(n1, n2)
-u32_t n1;
-u32_t n2;
-{
-	return !((u32_t)(n2-n1) & 0x80000000L);
-} */
-
 #undef tcp_GEmod4G
-/* int tcp_GEmod4G(n1, n2)
-u32_t n1;
-u32_t n2;
-{
-	return !((u32_t)(n1-n2) & 0x80000000L);
-} */
-
 #undef tcp_Lmod4G
-/* int tcp_Lmod4G(n1, n2)
-u32_t n1;
-u32_t n2;
-{
-	return !!((u32_t)(n1-n2) & 0x80000000L);
-} */
-
 #undef tcp_Gmod4G
-/* int tcp_Gmod4G(n1, n2)
-u32_t n1;
-u32_t n2;
-{
-	return !!((u32_t)(n2-n1) & 0x80000000L);
-} */
+
 
 void tcp_extract_ipopt(tcp_conn, ip_hdr)
 tcp_conn_t *tcp_conn;
 ip_hdr_t *ip_hdr;
 {
+	/* As far as I can tell, this is a function that
+	has no side effects. But it's also void. So, in essence,
+	it's a pure function that returns Unit. Therefore,
+	no need to transition to Ocaml, just return here. */
+	return;
+
+	/*
 	int ip_hdr_len;
 
 	ip_hdr_len= (ip_hdr->ih_vers_ihl & IH_IHL_MASK) << 2;
@@ -59,6 +40,7 @@ ip_hdr_t *ip_hdr;
 		return;
 
 	DBLOCK(1, printf("ip_hdr options NOT supported (yet?)\n"));
+	*/
 }
 
 void tcp_extract_tcpopt(tcp_conn, tcp_hdr, mssp)

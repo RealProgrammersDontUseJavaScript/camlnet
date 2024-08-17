@@ -1,0 +1,189 @@
+This text file lays out the structs defined in the *_int.h files
+(w/ the exception of mq.h) necessary to understand how TCP in inet works
+It has the format:
+
+file_name.h -
+typedef struct struct_name
+{
+	fields...
+} struct_name_t
+
+
+
+mq.h -
+typedef struct sr_req {
+	enum {
+		SRR_READ,
+		SRR_WRITE,
+		SRR_IOCTL
+	}			srr_type;
+	devminor_t		srr_minor; // int32_t
+	endpoint_t		srr_endpt; // int / process identifier
+	cp_grant_id_t		srr_grant; // int32_t / grant ID
+	union {
+		size_t		srr_size;	/* for SRR_READ, SRR_WRITE */
+		unsigned long	srr_req;	/* for SRR_IOCTL */
+	};
+	int			srr_flags;
+	cdev_id_t		srr_id; // Unsigned int
+} sr_req_t;
+
+typedef struct mq
+{
+	sr_req_t mq_req; // ^
+	struct mq *mq_next; // ^
+	int mq_allocated;
+} mq_t;
+
+
+sr_int.h -
+typedef struct sr_fd
+{
+	int srf_flags;
+	int srf_fd;
+	int srf_port;
+	endpoint_t srf_select_proc;
+	/* Function pointers typedef'd in sr.h:
+	sr_open_t srf_open;
+	sr_close_t srf_close;
+	sr_write_t srf_write;
+	sr_read_t srf_read;
+	sr_ioctl_t srf_ioctl;
+	sr_cancel_t srf_cancel;
+	sr_select_t srf_select;
+	*/
+	mq_t *srf_ioctl_q, *srf_ioctl_q_tail; ^
+	mq_t *srf_read_q, *srf_read_q_tail;
+	mq_t *srf_write_q, *srf_write_q_tail;
+	/* defined in event.h
+	event_t srf_ioctl_ev;
+	event_t srf_read_ev;
+	event_t srf_write_ev;
+	*/
+} sr_fd_t;
+
+tcp_int.h -
+typedef struct tcp_port
+{
+	int tp_ipdev;
+	int tp_flags;
+	int tp_state;
+	int tp_ipfd;
+	acc_t *tp_pack; // struct defined in buf.h
+	ipaddr_t tp_ipaddr; // u32_t
+	ipaddr_t tp_subnetmask;
+	u16_t tp_mtu;
+	struct tcp_conn *tp_snd_head; v
+	struct tcp_conn *tp_snd_tail;
+	event_t tp_snd_event; ^
+	struct tcp_conn *tp_conn_hash[TCP_CONN_HASH_NR][4];
+} tcp_port_t;
+
+typedef struct tcp_fd
+{
+	unsigned long tf_flags;
+	tcp_port_t *tf_port; ^
+	int tf_srfd;
+	ioreq_t tf_ioreq; // Unsigned long
+	nwio_tcpconf_t tf_tcpconf; // struct defined in repo/minix/include/net/gen/tcp_io.h
+	nwio_tcpopt_t tf_tcpopt;
+	/* Func. pointers defined in type.h:
+	get_userdata_t tf_get_userdata;
+	put_userdata_t tf_put_userdata;
+	select_res_t tf_select_res;
+	*/
+	struct tcp_conn *tf_conn;                        v
+	struct tcp_conn *tf_listenq[TFL_LISTEN_MAX = 5];
+	size_t tf_write_offset;
+	size_t tf_write_count;
+	size_t tf_read_offset;
+	size_t tf_read_count;
+	int tf_error;			/* Error for nonblocking connect */
+	tcp_cookie_t tf_cookie; // Struct defined in tcp_io.h
+} tcp_fd_t;
+
+typedef struct tcp_conn
+{
+	int tc_flags;
+	int tc_state;
+	int tc_busy;		/* do not steal buffer when a connection is 
+				 * busy
+				 */
+	tcp_port_t *tc_port; ^
+	tcp_fd_t *tc_fd; ^
+
+	tcpport_t tc_locport; // u16_t, defined in include/net/gen/tcp.h
+	ipaddr_t tc_locaddr; ^
+	tcpport_t tc_remport;
+	ipaddr_t tc_remaddr;
+
+	int tc_connInprogress;
+	int tc_orglisten;
+	clock_t tc_senddis; // _BSD_CLOCK_T_ =  unsigned long (on x86)
+
+	/* Sending side */
+	u32_t tc_ISS;		/* initial sequence number */
+	u32_t tc_SND_UNA;	/* least unacknowledged sequence number */
+	u32_t tc_SND_TRM;	/* next sequence number to be transmitted */
+	u32_t tc_SND_NXT;	/* next sequence number for new data */
+	u32_t tc_SND_UP;	/* urgent pointer, first sequence number not 
+				 * urgent */
+	u32_t tc_SND_PSH;	/* push pointer, data should be pushed until
+				 * the push pointer is reached */
+
+	u32_t tc_snd_cwnd;	/* highest sequence number to be sent */
+	u32_t tc_snd_cthresh;	/* threshold for send window */
+	u32_t tc_snd_cinc;	/* increment for send window threshold */
+	u16_t tc_snd_wnd;	/* max send queue size */
+	u16_t tc_snd_dack;	/* # of duplicate ACKs */
+
+	/* round trip calculation. */
+	clock_t tc_rt_time; ^
+	u32_t tc_rt_seq;
+	u32_t tc_rt_threshold;
+	clock_t tc_artt;	/* Avg. retransmission time. Scaled. */
+	clock_t tc_drtt;	/* Diviation, also scaled. */
+	clock_t tc_rtt;		/* Computed retrans time */
+
+	acc_t *tc_send_data;
+	acc_t *tc_frag2send;
+	struct tcp_conn *tc_send_link;
+
+	/* Receiving side */
+	u32_t tc_IRS;
+	u32_t tc_RCV_LO;
+	u32_t tc_RCV_NXT;
+	u32_t tc_RCV_HI;
+	u32_t tc_RCV_UP;
+
+	u16_t tc_rcv_wnd;
+	acc_t *tc_rcvd_data; ^
+	acc_t *tc_adv_data;
+	u32_t tc_adv_seq;
+
+	/* Keep alive. Record SDN_NXT and RCV_NXT in tc_ka_snd and
+	 * tc_ka_rcv when setting the keepalive timer to detect
+	 * any activity that may have happend before the timer
+	 * expired.
+	 */
+	u32_t tc_ka_snd;
+	u32_t tc_ka_rcv;
+	clock_t tc_ka_time; ^
+
+	acc_t *tc_remipopt; ^
+	acc_t *tc_tcpopt;
+	u8_t tc_tos;
+	u8_t tc_ttl;
+	u16_t tc_max_mtu;	/* Max. negotiated (or selected) MTU */
+	u16_t tc_mtu;		/* discovered PMTU */
+	clock_t tc_mtutim;	/* Last time MTU/TCF_PMTU flag was changed */
+
+	minix_timer_t tc_transmit_timer;
+	u32_t tc_transmit_seq;
+	clock_t tc_0wnd_to; ^
+	clock_t tc_stt;		/* time of first send after last ack */
+	clock_t tc_rt_dead;
+
+	int tc_error;
+	int tc_inconsistent; 
+} tcp_conn_t;
