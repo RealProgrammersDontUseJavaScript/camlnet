@@ -1,3 +1,6 @@
+# \*\* ON HOLD \*\*
+Currently VirtualBox is not working. Every attempt to boot a VM (not just Minix) gives a critical error. I've spent hours trying to debug it, to no avail. Until I can fix it, or get something else (like QEMU) to work, this project is on hold.
+
 # An implementation of the Minix TCP stack in OCaml
 
 A reimplementation of Minix 3.3.0's TCP stack in OCaml, using the OCaml FFI. Linked into the inet ELF.
