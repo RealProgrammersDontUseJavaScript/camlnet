@@ -1,5 +1,5 @@
-# \*\* ON HOLD \*\*
-Currently VirtualBox is not working. Every attempt to boot a VM (not just Minix) gives a critical error. I've spent hours trying to debug it, to no avail. Until I can fix it, or get something else (like QEMU) to work, this project is on hold.
+# Back in business
+VirtualBox just started working again; package manager likely sent out a screwed-up version of VB that broke everything. Active development resuming.
 
 # An implementation of the Minix TCP stack in OCaml
 
