@@ -1,16 +1,30 @@
 #include <caml/mlvalues.h>
-#include <caml/alloc.h>
+#include <caml/custom.h> // For custom_XXXXX default struct members
+// #include <caml/alloc.h>
 #include <caml/memory.h>
 #include <caml/callback.h>
 #include <caml/intext.h> // Needed for the serialization/deserialization func's
 
+#include "inet.h"    // So the compiler doesn't complain about "ipaddr_t"
+#include "event.h"   // So the compiler doesn't complain about "event_t"
+#include "buf.h"     // So the compiler doesn't complain about "acc_t"
+#include "clock.h"   // So the compiler doesn't complain about "minix_timer_t"
+#include "type.h"    // For get_userdata_t, put_userdata_t, & select_res_t
 #include "tcp_int.h" // For the tcp_conn_t definition (so far)
 
 #include <stdint.h>
 
+// So tcp_int.h doesn't complain
+#undef tcp_LEmod4G
+#undef tcp_GEmod4G
+#undef tcp_Lmod4G
+#undef tcp_Gmod4G
+
+
 /* This file includes all the wrappers around the Ocaml func's
    Information gathered from these links:
    https://ocaml.org/manual/4.02/intfc.html
+   https://ocaml.org/manual/4.03/intfc.html
    https://askra.de/software/ocaml-doc/4.02/intfc.html
    
    TO-DO: Ocaml func pointers should be initialized either
@@ -28,10 +42,10 @@ struct custom_operations tcp_conn_t_ops = {
   "inet.tcp_conn_t",
   custom_finalize_default,    // Leave this field default for now, when it's GC'ed nothing should happen
   custom_compare_default,     // If you're comparing 2 TCP connections, you're doing it wrong
-  custom_compare_ext_default, // See above ^
   custom_hash_default,        // Default for now, must fix later
   tcp_conn_t_serialize,
-  tcp_conn_t_deserialize
+  tcp_conn_t_deserialize,
+  custom_compare_ext_default // See above ^
 };
 
 
@@ -77,6 +91,9 @@ int tcp_Gmod4G(u32_t n1, u32_t n2) {
 
 // Skip tcp_extract_ipopt since it does nothing
 
+/* Comment out tcp_extract_tcpopt (for now),
+   since the defined preprocessor directive doesn't
+   behave the way I thought it would
 #if !defined(tcp_extract_tcpopt) // Don't replace the tcp_lib func. until it has been removed & this 1 finished
 // Transfer struct pointers according to: https://gaiustech.wordpress.com/2011/05/17/accessing-c-memory-structures-from-ocaml/
 void tcp_extract_tcpopt(tcp_conn_t* tcp_conn, tcp_hdr_t* tcp_hdr, size_t* mssp) {
@@ -87,7 +104,7 @@ void tcp_extract_tcpopt(tcp_conn_t* tcp_conn, tcp_hdr_t* tcp_hdr, size_t* mssp) 
   return;
 }
 #endif
-
+*/
 
 // All the func's needed for the custom operations struct above
 // Note: cust_block = tcp_conn_t**
@@ -98,9 +115,13 @@ static void tcp_conn_t_serialize(value cust_block, uintnat* i386_size, uintnat* 
      If a C program is being compiled on a 32 or 64-bit platform
      Therefore, I will disallow compilation on anything other than
      an i386/x86 Minix platform */
+
+  /* Quick fix to allow compilation:
+
   #if (sizeof(tcp_conn_t*) != 4)
     #error
   #endif
+  */
   *i386_size = sizeof(tcp_conn_t*);
   *amd_size = sizeof(tcp_conn_t*) * 2;
   // This is totally inappropriate, but no elegant way of doing it... for now
@@ -109,12 +130,12 @@ static void tcp_conn_t_serialize(value cust_block, uintnat* i386_size, uintnat* 
   return;
 }
 
-static void tcp_conn_t_deserialize(void* cust_block) {
+static uintnat tcp_conn_t_deserialize(void* cust_block) {
   tcp_conn_t* temp;
   caml_deserialize_block_4(&temp, 1);
-  *((tcp_conn_t*) Data_custom_val(cust_block)) = temp; 
+  *((tcp_conn_t*) Data_custom_val(cust_block)) = *temp; 
   
-  return;
+  return 0; // Must fix later
 }
 
 
