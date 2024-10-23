@@ -79,6 +79,8 @@ void tcp_init()
 	assert (BUF_S >= sizeof(struct nwio_tcpconf));
 	assert (BUF_S >= IP_MAX_HDR_SIZE + TCP_MAX_HDR_SIZE);
 
+	caml_init();
+
 	for (i=0, tcp_fd= tcp_fd_table; i<TCP_FD_NR; i++, tcp_fd++)
 	{
 		tcp_fd->tf_flags= TFF_EMPTY;

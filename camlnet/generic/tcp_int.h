@@ -236,6 +236,9 @@ int tcp_Lmod4G ARGS(( u32_t n1, u32_t n2 ));
 int tcp_GEmod4G ARGS(( u32_t n1, u32_t n2 ));
 int tcp_Gmod4G ARGS(( u32_t n1, u32_t n2 ));
 
+/* tcp_lib_help_shim.c */
+void caml_init();
+
 /* tcp.c */
 void tcp_restart_connect ARGS(( tcp_conn_t *tcp_conn ));
 int tcp_su4listen ARGS(( tcp_fd_t *tcp_fd, tcp_conn_t *tcp_conn,
